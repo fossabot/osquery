@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <aws/kinesis/KinesisClient.h>
 
 #include <osquery/core.h>
@@ -23,6 +25,10 @@ class KinesisLoggerPlugin : public LoggerPlugin {
  KinesisLoggerPlugin() : LoggerPlugin(), client_() {
     shardId_ = getHostIdentifier();
   }
+
+  Status init(const std::string& name,
+              const std::vector<StatusLogLine>& log) override;
+
 
   Status logString(const std::string& s) override;
 
