@@ -20,6 +20,7 @@
 #include <osquery/flags.h>
 #include <osquery/registry.h>
 
+#include "osquery/logger/plugins/logger_plugin_util.h"
 #include "osquery/remote/requests.h"
 #include "osquery/remote/serializers/json.h"
 #include "osquery/remote/transports/tls.h"
@@ -57,21 +58,6 @@ REGISTER(TLSLoggerPlugin, "logger", "tls");
 static inline std::string genLogIndex(bool results, unsigned long& counter) {
   return ((results) ? "r" : "s") + std::to_string(getUnixTime()) + "_" +
          std::to_string(++counter);
-}
-
-static inline void iterate(std::vector<std::string>& input,
-                           std::function<void(std::string&)> predicate) {
-  // Since there are no 'multi-do' APIs, keep a count of consecutive actions.
-  // This count allows us to sleep the thread to prevent utilization thrash.
-  size_t count = 0;
-  for (auto& item : input) {
-    // The predicate is provided a mutable string.
-    // It may choose to clear/move the data.
-    predicate(item);
-    if (++count % 100 == 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
-  }
 }
 
 TLSLogForwarderRunner::TLSLogForwarderRunner(const std::string& node_key)
@@ -160,6 +146,12 @@ Status TLSLogForwarderRunner::send(std::vector<std::string>& log_data,
     pt::ptree children;
     iterate(log_data,
             ([&children](std::string& item) {
+              // Enforce a max log line size for TLS logging.
+              if (item.size() > FLAGS_logger_tls_max) {
+                LOG(WARNING) << "Line exceeds TLS logger max: " << item.size();
+                return;
+              }
+
               pt::ptree child;
               try {
                 std::stringstream input;
@@ -168,6 +160,7 @@ Status TLSLogForwarderRunner::send(std::vector<std::string>& log_data,
                 pt::read_json(input, child);
               } catch (const pt::json_parser::json_parser_error& e) {
                 // The log line entered was not valid JSON, skip it.
+                return;
               }
               children.push_back(std::make_pair("", std::move(child)));
             }));
