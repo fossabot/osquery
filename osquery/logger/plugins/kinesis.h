@@ -22,13 +22,14 @@ namespace osquery {
 
 class KinesisLoggerPlugin : public LoggerPlugin {
  public:
- KinesisLoggerPlugin() : LoggerPlugin(), client_() {
-    shardId_ = getHostIdentifier();
-  }
+  KinesisLoggerPlugin() : LoggerPlugin(), client_() {}
+
+  Status setUp() override;
 
   Status init(const std::string& name,
-              const std::vector<StatusLogLine>& log) override;
-
+              const std::vector<StatusLogLine>& log) override {
+    return Status(1, "Does not support status logs");
+  }
 
   Status logString(const std::string& s) override;
 
