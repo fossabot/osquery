@@ -10,6 +10,12 @@
 
 #pragma once
 
+#include <chrono>
+#include <functional>
+#include <string>
+#include <thread>
+#include <vector>
+
 #include <osquery/dispatcher.h>
 #include <osquery/logger.h>
 
@@ -39,15 +45,23 @@ static inline void iterate(std::vector<std::string>& input,
  */
 class BufferedLogForwarderRunner : public InternalRunnable {
  private:
-  static const time_t kLogPeriod;
+  static const std::chrono::seconds kLogPeriod;
   static const size_t kMaxLogLines;
 
  public:
-  explicit BufferedLogForwarderRunner()
-      : logPeriod_(kLogPeriod), maxLogLines_(kMaxLogLines) {}
+  explicit BufferedLogForwarderRunner(const std::string& name)
+      : logPeriod_(kLogPeriod),
+        maxLogLines_(kMaxLogLines),
+        logIndex_(0),
+        indexName_(name) {}
 
+ public:
   /// A simple wait lock, and flush based on settings.
   void start() override;
+
+  Status logString(const std::string& s);
+
+  Status logStatus(const std::vector<StatusLogLine>& log);
 
  protected:
   /**
@@ -69,13 +83,23 @@ class BufferedLogForwarderRunner : public InternalRunnable {
    */
   void check();
 
+  std::string genLogIndex(bool results);
+
   /// Seconds between flushing logs
-  time_t logPeriod_;
+  std::chrono::seconds logPeriod_;
 
   /// Max number of logs to flush per check
   size_t maxLogLines_;
 
- private:
-  friend class BufferedLoggerTests;
+  /// Hold an incrementing index for buffering logs
+  size_t logIndex_;
+
+  /**
+   * @brief Name to use in index
+   *
+   * This name is used so that loggers of different types that are operating
+   * simultaneously can separately maintain their buffer of logs.
+   */
+  std::string indexName_;
 };
 }
