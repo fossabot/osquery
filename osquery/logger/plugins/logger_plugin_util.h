@@ -48,10 +48,33 @@ class BufferedLogForwarderRunner : public InternalRunnable {
   static const std::chrono::seconds kLogPeriod;
   static const size_t kMaxLogLines;
 
- public:
+ protected:
+  // These constructors are made available for subclasses to use, but they
+  // should expose the appropriate constructors to their users.
   explicit BufferedLogForwarderRunner(const std::string& name)
       : logPeriod_(kLogPeriod),
         maxLogLines_(kMaxLogLines),
+        logIndex_(0),
+        indexName_(name) {}
+
+  template <class Rep, class Period>
+  explicit BufferedLogForwarderRunner(
+      const std::string& name,
+      const std::chrono::duration<Rep, Period>& log_period)
+      : logPeriod_(
+            std::chrono::duration_cast<std::chrono::seconds>(log_period)),
+        maxLogLines_(kMaxLogLines),
+        logIndex_(0),
+        indexName_(name) {}
+
+  template <class Rep, class Period>
+  explicit BufferedLogForwarderRunner(
+      const std::string& name,
+      const std::chrono::duration<Rep, Period>& log_period,
+      size_t max_log_lines)
+      : logPeriod_(
+            std::chrono::duration_cast<std::chrono::seconds>(log_period)),
+        maxLogLines_(max_log_lines),
         logIndex_(0),
         indexName_(name) {}
 
