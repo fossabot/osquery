@@ -31,10 +31,10 @@ class LoggerPluginUtilTests : public Test {
   }
 };
 
-class MockBufferedLogForwarderRunner : public BufferedLogForwarderRunner {
+class MockBufferedLogForwarder : public BufferedLogForwarder {
  public:
-  using BufferedLogForwarderRunner::BufferedLogForwarderRunner;
-  MockBufferedLogForwarderRunner() : BufferedLogForwarderRunner("mock") {}
+  using BufferedLogForwarder::BufferedLogForwarder;
+  MockBufferedLogForwarder() : BufferedLogForwarder("mock") {}
 
   MOCK_METHOD2(send,
       Status(std::vector<std::string>& log_data, const std::string& log_type));
@@ -46,14 +46,14 @@ class MockBufferedLogForwarderRunner : public BufferedLogForwarderRunner {
 };
 
 TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_index) {
-  MockBufferedLogForwarderRunner runner;
+  MockBufferedLogForwarder runner;
   EXPECT_THAT(runner.genLogIndex(true), ContainsRegex("r_mock_[0-9]+_1"));
   EXPECT_THAT(runner.genLogIndex(true), ContainsRegex("r_mock_[0-9]+_2"));
   EXPECT_THAT(runner.genLogIndex(true), ContainsRegex("r_mock_[0-9]+_3"));
 }
 
 TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_basic) {
-  StrictMock<MockBufferedLogForwarderRunner> runner;
+  StrictMock<MockBufferedLogForwarder> runner;
   runner.logString("foo");
 
   EXPECT_CALL(runner, send(ElementsAre("foo"), "result"))
@@ -72,7 +72,7 @@ TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_basic) {
 }
 
 TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_retry) {
-  StrictMock<MockBufferedLogForwarderRunner> runner;
+  StrictMock<MockBufferedLogForwarder> runner;
   runner.logString("foo");
 
   EXPECT_CALL(runner, send(ElementsAre("foo"), "result"))
@@ -94,7 +94,7 @@ TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_retry) {
 }
 
 TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_async) {
-  auto runner = std::make_shared<StrictMock<MockBufferedLogForwarderRunner>>(
+  auto runner = std::make_shared<StrictMock<MockBufferedLogForwarder>>(
       "mock", std::chrono::milliseconds(100));
   Dispatcher::addService(runner);
 
@@ -120,7 +120,7 @@ TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_async) {
 }
 
 TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_split) {
-  StrictMock<MockBufferedLogForwarderRunner> runner(
+  StrictMock<MockBufferedLogForwarder> runner(
       "mock", std::chrono::milliseconds(100), 1);
   runner.logString("foo");
   runner.logString("bar");
@@ -143,7 +143,7 @@ TEST_F(LoggerPluginUtilTests, test_buffered_log_forwarder_split) {
       .WillOnce(Return(Status(0, "OK")));
   runner.check();
 
-  StrictMock<MockBufferedLogForwarderRunner> runner2(
+  StrictMock<MockBufferedLogForwarder> runner2(
       "mock", std::chrono::milliseconds(100), 2);
   runner2.logString("foo");
   runner2.logString("bar");

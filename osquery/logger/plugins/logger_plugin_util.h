@@ -39,11 +39,11 @@ static inline void iterate(std::vector<std::string>& input,
 /**
  * @brief A log forwarder thread flushing database-buffered logs.
  *
- * The BufferedLogForwarderRunner flushes buffered result and status logs based
+ * The BufferedLogForwarder flushes buffered result and status logs based
  * on CLI/options settings. If an enrollment key is set (and checked) during
  * startup, this Dispatcher service is started.
  */
-class BufferedLogForwarderRunner : public InternalRunnable {
+class BufferedLogForwarder : public InternalRunnable {
  private:
   static const std::chrono::seconds kLogPeriod;
   static const size_t kMaxLogLines;
@@ -51,14 +51,14 @@ class BufferedLogForwarderRunner : public InternalRunnable {
  protected:
   // These constructors are made available for subclasses to use, but they
   // should expose the appropriate constructors to their users.
-  explicit BufferedLogForwarderRunner(const std::string& name)
+  explicit BufferedLogForwarder(const std::string& name)
       : logPeriod_(kLogPeriod),
         maxLogLines_(kMaxLogLines),
         logIndex_(0),
         indexName_(name) {}
 
   template <class Rep, class Period>
-  explicit BufferedLogForwarderRunner(
+  explicit BufferedLogForwarder(
       const std::string& name,
       const std::chrono::duration<Rep, Period>& log_period)
       : logPeriod_(
@@ -68,7 +68,7 @@ class BufferedLogForwarderRunner : public InternalRunnable {
         indexName_(name) {}
 
   template <class Rep, class Period>
-  explicit BufferedLogForwarderRunner(
+  explicit BufferedLogForwarder(
       const std::string& name,
       const std::chrono::duration<Rep, Period>& log_period,
       size_t max_log_lines)

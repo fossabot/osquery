@@ -26,10 +26,10 @@ namespace pt = boost::property_tree;
 
 namespace osquery {
 
-const auto BufferedLogForwarderRunner::kLogPeriod = std::chrono::seconds(4);
-const size_t BufferedLogForwarderRunner::kMaxLogLines = 1024;
+const auto BufferedLogForwarder::kLogPeriod = std::chrono::seconds(4);
+const size_t BufferedLogForwarder::kMaxLogLines = 1024;
 
-void BufferedLogForwarderRunner::check() {
+void BufferedLogForwarder::check() {
   // Get a list of all the buffered log items, with a max of 1024 lines.
   std::vector<std::string> indexes;
   auto status = scanDatabaseKeys(kLogs, indexes, maxLogLines_);
@@ -76,7 +76,7 @@ void BufferedLogForwarderRunner::check() {
   }
 }
 
-void BufferedLogForwarderRunner::start() {
+void BufferedLogForwarder::start() {
   while (!interrupted()) {
     check();
 
@@ -85,13 +85,12 @@ void BufferedLogForwarderRunner::start() {
   }
 }
 
-Status BufferedLogForwarderRunner::logString(const std::string& s) {
+Status BufferedLogForwarder::logString(const std::string& s) {
   std::string index = genLogIndex(true);
   return setDatabaseValue(kLogs, index, s);
 }
 
-Status BufferedLogForwarderRunner::logStatus(
-    const std::vector<StatusLogLine>& log) {
+Status BufferedLogForwarder::logStatus(const std::vector<StatusLogLine>& log) {
   // Append decorations to status (unique to TLS logger).
   // Assemble a decorations tree to append to each status buffer line.
   pt::ptree dtree;
@@ -138,7 +137,7 @@ Status BufferedLogForwarderRunner::logStatus(
   return Status(0, "OK");
 }
 
-std::string BufferedLogForwarderRunner::genLogIndex(bool results) {
+std::string BufferedLogForwarder::genLogIndex(bool results) {
   return ((results) ? "r" : "s") + std::string("_") + indexName_ + "_" +
          std::to_string(getUnixTime()) + "_" + std::to_string(++logIndex_);
 }
