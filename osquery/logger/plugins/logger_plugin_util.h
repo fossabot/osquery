@@ -39,18 +39,20 @@ static inline void iterate(std::vector<std::string>& input,
 /**
  * @brief A log forwarder thread flushing database-buffered logs.
  *
- * The BufferedLogForwarder flushes buffered result and status logs based
- * on CLI/options settings. If an enrollment key is set (and checked) during
- * startup, this Dispatcher service is started.
+ * This is a base class intended to provide reliable buffering and sending of
+ * status and result logs. Subclasses may take advantage of this reliable
+ * sending logic, and implement their own methods for actually sending logs.
+ *
+ * Subclasses must define the send() method
  */
 class BufferedLogForwarder : public InternalRunnable {
- private:
+ protected:
   static const std::chrono::seconds kLogPeriod;
   static const size_t kMaxLogLines;
 
  protected:
-  // These constructors are made available for subclasses to use, but they
-  // should expose the appropriate constructors to their users.
+  // These constructors are made available for subclasses to use, but
+  // subclasses should expose appropriate constructors to their users.
   explicit BufferedLogForwarder(const std::string& name)
       : logPeriod_(kLogPeriod),
         maxLogLines_(kMaxLogLines),
