@@ -423,7 +423,7 @@ function install_libcryptsetup() {
 }
 
 function install_aws_sdk() {
-  SOURCE=aws-sdk-cpp-0.10.6
+  SOURCE=aws-sdk-cpp-0.12.4
   TARBALL=$SOURCE.tar.gz
   URL=$DEPS_URL/$TARBALL
 
