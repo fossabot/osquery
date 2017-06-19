@@ -183,6 +183,8 @@ std::shared_ptr<Aws::Http::HttpResponse> NetlibHttpClient::MakeRequest(
 
     response->GetResponseBody() << resp.body();
 
+    fprintf(stderr, "%s\n", resp.body().c_str());
+
   } catch (const std::exception& /*e*/) {
     LOG(ERROR) << "Exception making HTTP request to URL: " << url;
     return nullptr;
