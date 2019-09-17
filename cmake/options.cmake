@@ -75,7 +75,7 @@ overwrite_cache_variable("BUILD_TESTING" "BOOL" "OFF")
 # Linux can use source and formula modules to link dependencies; this
 # feature is not yet available on Windows and macOS
 if(DEFINED PLATFORM_LINUX)
-  set(third_party_source_list "source;formula;facebook")
+  set(third_party_source_list "source_migration;source;formula;facebook")
 else()
   set(third_party_source_list "source_migration;facebook")
 endif()

@@ -29,7 +29,7 @@
 	path = libraries/cmake/source/sleuthkit/src
 	url = https://github.com/sleuthkit/sleuthkit
 [submodule "libraries/cmake/source/sqlite/src"]
-	path = libraries/cmake/source/sqlite/src
+	path = libraries/cmake/source_migration/sqlite/src
 	url = https://github.com/osquery/third-party-sqlite
 [submodule "libraries/cmake/source/ssdeep-cpp/src"]
 	path = libraries/cmake/source/ssdeep-cpp/src
